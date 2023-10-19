@@ -1,0 +1,19 @@
+{
+    "vehicle_name" : {
+        "40": "Calya",
+        "41": "Calya",
+
+        "20": "Veloz",
+        "21": "Veloz",
+        "22": "Veloz",
+
+        "05": "Yaris",
+        "06": "Yaris",
+        "07": "Yaris",
+
+        "90": "D03B",
+        "91": "D03B"
+      },
+
+    "save_results" : false
+}

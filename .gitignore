@@ -1,0 +1,5 @@
+TRACEBILITY_IMAGES/
+TEMP/
+TEMP_QUEUE/
+__pycache__/
+.env

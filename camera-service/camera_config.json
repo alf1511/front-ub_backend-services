@@ -1,0 +1,20 @@
+{
+    "cameras" : {
+        "1" : 0,
+        "2" : 1
+    },
+    "object_detection_model" : {
+        "model" : "./ai_model/yolov8n.pt",
+        "conf" : 0.7,
+        "img_size" : 800
+    },
+    "program" :{
+        "cv_backend" : "default",
+        "release_cam" : true,
+        "multithreads" : {
+            "status" : true,
+            "max_threads" : 2
+        }
+    }
+  }
+  
