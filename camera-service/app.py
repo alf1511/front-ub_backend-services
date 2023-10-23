@@ -46,12 +46,12 @@ if __name__=='__main__':
 
     app.cameras = {}
     app.camera_indexes = []
+    
+    conf = config['object_detection_model']['conf']
+    img_size = config['object_detection_model']['img_size']
+    cv_backend = config['program']['cv_backend']
 
     for index, cam in config['cameras'].items():
-        conf = config['object_detection_model']['conf']
-        img_size = config['object_detection_model']['img_size']
-        cv_backend = config['program']['cv_backend']
-
         camera = Camera(index, cam, app.ai_model, conf, img_size, cv_backend)
 
         if camera.isOpened():
@@ -63,7 +63,7 @@ if __name__=='__main__':
     
     print(f'Available cameras : {app.cameras}')
 
-    camera_controller = CameraController(app.cameras, True)
+    camera_controller = CameraController(app.cameras, True, config['program']['release_cam'])
 
     if len(app.cameras) == 0:
             print("No camera available")

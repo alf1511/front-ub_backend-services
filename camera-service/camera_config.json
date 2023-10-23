@@ -10,7 +10,7 @@
     },
     "program" :{
         "cv_backend" : "default",
-        "release_cam" : true,
+        "release_cam" : false,
         "multithreads" : {
             "status" : true,
             "max_threads" : 2
