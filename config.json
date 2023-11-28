@@ -1,0 +1,48 @@
+{
+    "cameras" : {
+        "1" : "./test_images/VELOZ_6H_26_0.jpeg",
+        "2" : "./test_images/VELOZ_6H_26_1.jpeg",
+        "3" : "./test_images/VELOZ_6H_26_2.jpeg",
+        "4" : "./test_images/VELOZ_6H_26_3.jpeg",
+        "5" : "./test_images/VELOZ_6H_26_4.jpeg",
+        "6" : "./test_images/VELOZ_6H_26_5.jpeg",
+        "7" : "./test_images/VELOZ_6H_26_6.jpeg",
+        "8" : "./test_images/VELOZ_6H_26_7.jpeg"
+    },
+    "object_detection_model" : {
+        "model" : {
+            "Veloz":"./ai_model/Veloz_21-11-2023.pt",
+            "D03B":"./ai_model/best.pt",
+            "Yaris":"./ai_model/best.pt",
+            "Calya":"./ai_model/best.pt"
+        },
+        "conf" : 0.5,
+        "img_size" : 800
+    },
+    "program" :{
+        "inference_mode" : true,
+        "save_results" : true,
+        "cv_backend" : "default",
+        "release_cam" : true,
+        "multithreads" : {
+            "status" : true,
+            "max_threads" : 8
+        }
+    },
+    "vehicle_name" : {
+        "40": "Calya",
+        "41": "Calya",
+
+        "20": "Veloz",
+        "21": "Veloz",
+        "22": "Veloz",
+
+        "05": "Yaris",
+        "06": "Yaris",
+        "07": "Yaris",
+
+        "90": "D03B",
+        "91": "D03B"
+      }
+  }
+  
