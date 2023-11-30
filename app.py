@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv
 
 from ultralytics import YOLO
-from utils import initialize_camera, inference_frame
+from utils import initialize_camera, inference_frame, get_newest_files
 
 from specification import Specification
 from queue_ import Queue
@@ -23,6 +23,9 @@ CORS(app)
 
 app.save_results = True
 app.ai_model = {}
+app.front_data = {}
+
+app.is_inferencing = False
 
 load_dotenv()
 
@@ -55,8 +58,7 @@ def capture():
         partition = 100 / len(app.camera)
         progress = 0
 
-        # initiate results and images list
-        results_all = {}
+        # initiate images list
         images_all = []
 
         # Capture frame with multithreads if multithreads is enabled
@@ -139,7 +141,7 @@ def delete(idx):
 def get_image_list(uuid, cam_id):
     cam_id = int(cam_id)
     def generate_image(image):
-        ret, jpeg = cv2.imencode(".jpg",image)
+        _, jpeg = cv2.imencode(".jpg",image)
         image_ret = jpeg.tobytes()
 
         yield b'--frame\r\n'
@@ -153,32 +155,49 @@ def get_image_list(uuid, cam_id):
 @app.get("/dequeue/<qr>")
 def dequeue(qr):
     app.specification.set_specification(qr)
+    app.front_data = app.specification.spec
 
-    top_uuid = app.queue.get_image_uuid()[0]
-    vm = app.specification.variant
+    if app.inference_mode:
+        app.is_inferencing = True
+        top_uuid = app.queue.get_image_uuid()[0]
+        vm = app.specification.variant
 
-    inf_res = inference_frame(top_uuid, 
-                              app.ai_model[vm],
-                              app.model_config['conf'],
-                              app.model_config['img_size'],
-                              False)
-    app.queue.update_results(top_uuid, inf_res)
+        inf_res = inference_frame(top_uuid, 
+                                app.ai_model[vm],
+                                app.model_config['conf'],
+                                app.model_config['img_size'],
+                                )
+        app.queue.update_results(top_uuid, inf_res)
 
     result, uuid_image = app.queue.dequeue(app.inference_mode,
                                            app.specification.variant, 
                                            app.specification.suffix_no, 
                                            app.specification.frame_no)
+
     if result:
         app.specification.update_specification(result)
 
-    for k, v in result.items():
-        part = k.split('-')[0].strip()
-        if part in app.specification.spec:
-            app.specification.spec[part][3].append('{:.3f}%'.format(v))
+    if app.inference_mode:
+        for k, v in result.items():
+            part = k.split('-')[0].strip()
+            if part in app.specification.spec:
+                app.specification.spec[part][3].append('{:.3f}%'.format(v))
+        
+        if app.save_results:
+            app.specification.save_vehicle()
+            app.specification.save_specification()
+        
+        app.is_inferencing = False
     
-    if app.save_results:
-        app.specification.save_vehicle()
-        app.specification.save_specification()
+    if 'ENGINE UNDER COVER' in app.specification.spec:
+        if app.specification.spec['ENGINE UNDER COVER'][1]==[]:
+            app.specification.spec['ENGINE UNDER COVER'][1].append('WITHOUT') 
+            app.specification.spec['ENGINE UNDER COVER'][2] = 'OK' 
+    
+    print(f'new : {app.specification.spec}')
+
+    app.front_data = app.specification.spec
+    print(app.front_data)
 
     return {
         "result" : result,
@@ -198,6 +217,30 @@ def sync_queue():
             "frame_no" : app.specification.frame_no
         }
     }
+
+@app.get('/show_inf_images')
+def show_inf_images():
+    if os.path.exists(f"./INFERENCED_IMAGES"):
+        data = get_newest_files('./INFERENCED_IMAGES', len(app.camera_indexes))
+        print(data)
+        return {
+            'data': data
+        }
+    
+    return {'resp': 'No inferenced image yet.'}
+
+@app.get('/get_spec_front')
+def get_spec_front():
+    return app.front_data
+
+@app.get('/reset_front_data')
+def reset_front_data():
+    app.front_data = {}
+
+@app.get('/is_inferencing')
+def is_inferencing():
+    return {"data": app.is_inferencing}
+
 
 if __name__ == '__main__':
     try:

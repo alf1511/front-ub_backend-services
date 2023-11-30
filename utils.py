@@ -65,7 +65,7 @@ def initialize_camera(cam_config, program_config, cv_backend):
 
     return camera, camera_indexes
 
-def inference_frame(uuid, model, conf, img_size, save_inferenced_frame=False):
+def inference_frame(uuid, model, conf, img_size):
         total_inf_res = {}
         try:
             p = 'D:/Kuliah Alfons/Toyota/front_project/front_ub_no_ms/backend/TEMP'
@@ -73,7 +73,7 @@ def inference_frame(uuid, model, conf, img_size, save_inferenced_frame=False):
             for _, _, files in directory:
                 for file in files:
                     image = cv2.imread(f"{p}/{uuid}/{file}")
-                    res_one_cam = _inference_frame(image, model, conf, img_size, save_inferenced_frame)
+                    res_one_cam = _inference_frame(image, model, conf, img_size)
 
                     for r in res_one_cam:
                         if r not in total_inf_res:
@@ -84,15 +84,14 @@ def inference_frame(uuid, model, conf, img_size, save_inferenced_frame=False):
         except Exception as x:
             print(x)
 
-def _inference_frame(frame, model, conf, img_size, save_inferenced_frame):
+def _inference_frame(frame, model, conf, img_size):
     try:
         inf_frame = frame
         result = model(
             inf_frame, verbose=False, conf=conf, imgsz=img_size
         )
         inf_res = _draw_label(inf_frame, model, result)
-        # if save_inferenced_frame:
-        #     _save_inferenced_frame()
+        _save_inferenced_frame(inf_frame)
         
         return inf_res
     except Exception as e:
@@ -127,9 +126,14 @@ def _draw_label(frame, model, result):
 
     return detected_res
     
-# def _save_inferenced_frame():
-#     if not os.path.exists(f"./INFERENCED_IMAGES"):
-#             os.makedirs('INFERENCED_IMAGES')
+def _save_inferenced_frame(frame):
+    if not os.path.exists(f"./INFERENCED_IMAGES"):
+            os.makedirs('INFERENCED_IMAGES')
         
-#     files_count = len(os.listdir('./INFERENCED_IMAGES'))
-#     cv2.imwrite('./INFERENCED_IMAGES/'+str(files_count)+'.jpg', detect_frame)
+    files_count = len(os.listdir('./INFERENCED_IMAGES'))
+    cv2.imwrite('./INFERENCED_IMAGES/'+str(files_count)+'.jpg', frame)
+
+def get_newest_files(directory, num_files=5):
+    files = glob.glob(os.path.join(directory, '*'))
+    files.sort(key=os.path.getmtime, reverse=True)
+    return files[:num_files]

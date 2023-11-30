@@ -126,3 +126,4 @@ class Specification:
                     print("Failed to insert specification: ", str(e))
         else:
             print("Specification not saved to database, check your db connection or set database to True in confir.json")
+
